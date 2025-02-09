@@ -31,6 +31,7 @@ public class Plugin : BaseUnityPlugin
 
         shouldDisableAnalytics = Config.Bind("Analytics", "Disable Analytics", true, "Prevents Analytics from being sent.");
         shouldLogAnalytics = Config.Bind("Analytics", "Log Analytics to Console", false, "Shows JSON of analytics in console.");
+        // TODO allow player to change this and reload while in game instead of requiring restart.
 
         Harmony.CreateAndPatchAll(typeof(Plugin));
         Logger.LogInfo("Patched");
@@ -73,7 +74,7 @@ public class Plugin : BaseUnityPlugin
     [HarmonyPrefix]
     static bool DisableLeaderboardScores(){
         if (shouldDisableHiddenTraps.Value){
-            Console.WriteLine("Preventing score upload.");
+            Console.WriteLine("Preventing score upload.");  // TODO make this more player visible
             return false;
         }
         return true;

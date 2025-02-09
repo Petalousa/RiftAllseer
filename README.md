@@ -1,4 +1,20 @@
-# Install BepInEx
+# About
+
+I made this mod since I've been enjoying the maps, but I'm not a fan of the ? traps.
+
+Anyways...
+
+This mod does the following
+
+- disables the ? traps from spawning
+    - disables score upload (that way we don't pollute the leadorboard with invalid scores)
+    - disables score upload **ON ALL TRACKS** if active.
+
+- disables analytics
+
+You can enable/disable any of the above by modifying a config file.
+
+# Installation
 
 This assumes you are running Windows 10, 64-bit
 
@@ -44,3 +60,9 @@ In there you can change these configs:
 - docs: https://docs.bepinex.dev/master/articles/user_guide/installation/unity_mono.html
 
 - builds: https://builds.bepinex.dev/projects/bepinex_be
+
+# TODO
+- [ ] figure out a non-console way to alert player of config settings
+- [ ] unpload scores if the beatmap doesn't have any ? blocks
+- [ ] alert player that score won't count after game (maybe text in menu screen or something?)
+- [ ] allow player to change config and reload while in game instead of requiring full restart
