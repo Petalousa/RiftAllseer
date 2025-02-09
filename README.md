@@ -7,7 +7,7 @@ Anyways...
 This mod does the following
 
 - disables the ? traps from spawning
-    - disables score upload (that way we don't pollute the leadorboard with invalid scores)
+    - disables score upload (that way we don't pollute the leaderboard with invalid scores)
     - disables score upload **ON ALL TRACKS** if active.
 
 - disables analytics
@@ -33,7 +33,10 @@ This assumes you are running Windows 10, 64-bit
     b. Copy the contents into your Rift of the NecroDancer steam directory
     ![alt text](image-4.png)
 
-4. Install this mod by copying `RiftAllseer.dll` to the plugins directory
+4. Download this mod from the [release page here](https://github.com/Petalousa/RiftAllseer/releases/tag/v1.0.1)
+![alt text](image-7.png)
+
+4. Install this mod by copying `RiftAllseer.dll` to the BepInEx plugins directory
 ![alt text](image-5.png)
 ![alt text](image-1.png)
 
