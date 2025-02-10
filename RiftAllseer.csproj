@@ -20,7 +20,11 @@
       <HintPath>lib\Assembly-CSharp.dll</HintPath>
     </Reference>
   </ItemGroup>
-
+  <ItemGroup>
+    <Reference Include="UnityMath">
+      <HintPath>lib\Unity.Mathematics.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Unity.Mono" Version="6.0.0-be.*" IncludeAssets="compile" />
