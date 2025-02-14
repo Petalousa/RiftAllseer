@@ -12,6 +12,9 @@ using System.Reflection;
 using UnityEngine;
 using Unity.Mathematics;
 using UnityEngine.UIElements;
+using UnityEngine.Experimental.Rendering;
+using RhythmRift.Enemies;
+using System.IO;
 
 namespace RiftAllseer;
 
@@ -28,7 +31,12 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<float> scrollSpeedModifier;
     internal static float z_offset = 0.0f;
     internal static float y_offset = 0.0f;
-
+    internal static Texture2D customOnBeatTexture;
+    internal static Texture2D customHalfBeatTexture;
+    internal static Texture2D customOtherBeatTexture;
+    internal static Sprite customOnBeatSprite;
+    internal static Sprite customHalfBeatSprite;
+    internal static Sprite customOtherBeatSprite;
     private GameObject _textObject;
 
     private void Awake()
@@ -55,19 +63,50 @@ public class Plugin : BaseUnityPlugin
             Logger.LogInfo($"scrollSpeedModifier changed: {configEntry.Value}");
         };
 
+        string whermst = Assembly.GetExecutingAssembly().Location;
+        // Logger.LogWarning($"START A - {whermst} ");
+        string dir_name = Path.GetDirectoryName(whermst);
+        // Logger.LogWarning($"START A - {dir_name} ");
+        // string modFolder = new DirectoryInfo(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).Name;
+        // Logger.LogWarning($"START - {modFolder} ");
+        
+        // Create(Texture2D texture, Rect rect, Vector2 pivot); 
+        string imageDirectoryPath = Path.Join(dir_name, "img");
+
+        customOnBeatTexture = new Texture2D(512, 512, GraphicsFormat.R8G8B8A8_UNorm, 1, TextureCreationFlags.None);
+        customHalfBeatTexture = new Texture2D(512, 512, GraphicsFormat.R8G8B8A8_UNorm, 1, TextureCreationFlags.None);
+        customOtherBeatTexture = new Texture2D(512, 512, GraphicsFormat.R8G8B8A8_UNorm, 1, TextureCreationFlags.None);
+
+        customOnBeatTexture.LoadImage(File.ReadAllBytes(Path.Join(imageDirectoryPath, "on_beat.PNG")));
+        customHalfBeatTexture.LoadImage(File.ReadAllBytes(Path.Join(imageDirectoryPath, "half_beat.PNG")));
+        customOtherBeatTexture.LoadImage(File.ReadAllBytes(Path.Join(imageDirectoryPath, "other_beat.PNG")));
+
+        Rect rect1 = new Rect(0, 0, customOnBeatTexture.width, customOnBeatTexture.height);
+        Rect rect2 = new Rect(0, 0, customOnBeatTexture.width, customOnBeatTexture.height);
+        Rect rect3 = new Rect(0, 0, customOnBeatTexture.width, customOnBeatTexture.height);
+        // TODO automatically adjust the pixelsToUnits
+
+        customOnBeatSprite = Sprite.Create(customOnBeatTexture, rect1, new Vector2(0.5f, 0.5f), 50.0f);
+        customHalfBeatSprite = Sprite.Create(customHalfBeatTexture, rect2, new Vector2(0.5f, 0.5f), 50.0f);
+        customOtherBeatSprite = Sprite.Create(customOtherBeatTexture, rect3, new Vector2(0.5f, 0.5f), 50.0f);
+
         Harmony.CreateAndPatchAll(typeof(Plugin));
 
         // Positioning (using anchors for top-right)
-        RectTransform rectTransform = _textObject.GetComponent<RectTransform>();
-        rectTransform.anchorMin = new Vector2(1, 1); // Top-right
-        rectTransform.anchorMax = new Vector2(1, 1); // Top-right
-        rectTransform.pivot = new Vector2(1, 1);   // Top-right
-        rectTransform.anchoredPosition = new Vector2(-10, -10); // Offset from top-right corner (adjust as needed)
-
+        // RectTransform rectTransform = _textObject.GetComponent<RectTransform>();
+        // rectTransform.anchorMin = new Vector2(1, 1); // Top-right
+        // rectTransform.anchorMax = new Vector2(1, 1); // Top-right
+        // rectTransform.pivot = new Vector2(1, 1);   // Top-right
+        // rectTransform.anchoredPosition = new Vector2(-10, -10); // Offset from top-right corner (adjust as needed)
 
         Logger.LogInfo("Patched");
     }
 
+    // private void Start()
+    // {
+    //     Logger = base.Logger;
+    //     
+    // }
     private void Update()
     {
 
@@ -169,6 +208,125 @@ public class Plugin : BaseUnityPlugin
         );
     }
 
+    [HarmonyPatch(typeof(RREnemyController), "Initialize")]
+    [HarmonyPrefix]
+    static bool Initialize(ref IRRGridDataAccessor gridDataAccessor){
+        Console.WriteLine($"Initialized EnemyController.... grid is r{gridDataAccessor.NumRows} x r{gridDataAccessor.NumColumns}");
+
+
+
+        // asdf
+        //gridDataAccessor.GetType().GetField("NumRows", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(gridDataAccessor, 5);
+
+        //Console.WriteLine($"Reflected upon enemyController.... grid is r{gridDataAccessor.NumRows} x r{gridDataAccessor.NumColumns}");
+
+        return true;
+    }
+    [HarmonyPatch(typeof(RhythmRift.Enemies.RREnemy), "UpdateMovement")]
+    [HarmonyPostfix]
+    static void Whoop(ref RREnemy __instance){
+        //Vector3 newPosition = ((Component)__instance).transform.position;
+        //newPosition.x += (float)Math.Sin(Time.time * 8.0) * 0.1f;
+        //((Component)__instance).transform.position = newPosition;
+        
+    }
+    [HarmonyPatch(typeof(RREnemy), "Initialize")]
+    [HarmonyPrefix]
+    static bool NewHooves(ref RREnemy __instance){
+        Console.WriteLine("Minitialized");
+
+
+        FieldInfo onBeatField = typeof(RREnemy).GetField("_onBeatShadowSprite", BindingFlags.Instance | BindingFlags.NonPublic);
+        onBeatField.SetValue(__instance, customOnBeatSprite);
+
+        FieldInfo halfBeatField = typeof(RREnemy).GetField("_halfBeatShadowSprite", BindingFlags.Instance | BindingFlags.NonPublic);
+        halfBeatField.SetValue(__instance, customHalfBeatSprite);
+
+        FieldInfo otherBeatField = typeof(RREnemy).GetField("_otherBeatShadowSprite", BindingFlags.Instance | BindingFlags.NonPublic);
+        otherBeatField.SetValue(__instance, customOtherBeatSprite);
+
+
+        // Sprite shadow_sprite = (Sprite)spr.GetValue(__instance);
+        // if (shadow_sprite == null){
+        //     return true;
+        // } else if (starSprite == shadow_sprite){
+        //     Console.WriteLine("ALreeedy mine :)");
+        //     return true;
+        // }
+        // if (shadow_sprite.texture == null){
+        //     return true;
+        // }
+
+        // Console.Write("texture info: ");
+        // Console.Write($"texture : {shadow_sprite.texture}");
+        // Console.Write($"rect : {shadow_sprite.rect}");
+        // Console.Write($"pivot : {shadow_sprite.pivot}");
+        // Console.Write($"pixelsPerUnit : {shadow_sprite.pixelsPerUnit}");
+        // Console.Write($"textureRect : {shadow_sprite.textureRect}");
+        // Console.Write($"packed : {shadow_sprite.packed}");
+        // Console.Write($"border : {shadow_sprite.border}");
+        // Console.Write("\n");
+
+        // spr.SetValue(__instance, starSprite);
+
+        // if (shadow_sprite == null){
+        //     Console.WriteLine("Canbdnna find me a RREMEMEMNAY spriite.");
+        //     return true;
+        // }
+
+        // FieldInfo textureField = typeof(Sprite).GetField("m_texture", 
+        //     BindingFlags.Instance | BindingFlags.NonPublic);
+
+        // // Or search through all private fields if you're not sure of the name
+        // FieldInfo[] privateFields = typeof(Sprite).GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+        // foreach (var field in privateFields) {
+        //     Console.WriteLine(field.Name); // This will help you find the actual field name
+        // }
+
+        // // Once you have the right field, you can set it
+        // if (textureField == null) {
+        //     Console.WriteLine("Error finding texturefield."); // This will help you find the actual field name
+        //     return true;
+        // }
+        // textureField.SetValue(shadow_sprite, starTexture);
+
+        // //shadow_sprite.texture = starTexture;
+        // Console.WriteLine("BRED TIM");
+        // PropertyInfo espernam = typeof(Sprite).GetProperty("texture", BindingFlags.Instance | BindingFlags.Public);
+        // if (espernam == null){
+        //     Console.WriteLine("Canbdnna espernam spriite.");
+        //     return true;
+        // }
+        // espernam.SetValue(shadow_sprite, starTexture);
+        
+        //shadow_sprite.texture = my_custom_texture;
+        return true;
+        // replace the shadow sprite.
+
+
+        //Vector3 newPosition = ((Component)__instance).transform.position;
+        //newPosition.x += (float)Math.Sin(Time.time * 8.0) * 0.1f;
+        //((Component)__instance).transform.position = newPosition;
+        
+
+        /*
+[Info   :   Console] Minitialized
+[Info   :   Console] BRED TIM
+[Error  : Unity Log] NullReferenceException: Object reference not set to an instance of an object
+Stack trace:
+RiftAllseer.Plugin.NewHooves (RhythmRift.Enemies.RREnemy& __instance) (at <85f28e56952f4189ab1c6728c06c5026>:0)
+(wrapper dynamic-method) RhythmRift.Enemies.RREnemy.DMD<RhythmRift.Enemies.RREnemy::Initialize>(RhythmRift.Enemies.RREnemy,RhythmRift.RREnemyInitializationData,UnityEngine.AnimationCurve,Shared.RhythmEngine.FmodTimeCapsule,bool)
+RhythmRift.Enemies.RRSkeletonEnemy.Initialize (RhythmRift.RREnemyInitializationData enemyInitializationData, UnityEngine.AnimationCurve defaultMovementCurve, Shared.RhythmEngine.FmodTimeCapsule fmodTimeCapsule, System.Boolean shouldDisableMovementAnimations) (at <6c554ed27fa1478db4b343d56024cb45>:0)
+RhythmRift.RREnemyController.SpawnEnemy (RhythmRift.SpawnEnemyData spawnEnemyData, System.Guid groupId, Shared.RhythmEngine.FmodTimeCapsule fmodTimeCapsule, Unity.Mathematics.int2 spawnGridPosition) (at <6c554ed27fa1478db4b343d56024cb45>:0)
+(wrapper dynamic-method) RhythmRift.RREnemyController.DMD<RhythmRift.RREnemyController::SpawnEnemy>(RhythmRift.RREnemyController,RhythmRift.SpawnEnemyData,System.Guid,Shared.RhythmEngine.FmodTimeCapsule)
+RhythmRift.RRStageController.HandleEnemySpawnBeatEvent (RhythmRift.SpawnEnemyData spawnEnemyData) (at <6c554ed27fa1478db4b343d56024cb45>:0)
+RhythmRift.RRBeatmapPlayer.ProcessBeatEvent (System.Single currentTime, Shared.RhythmEngine.BeatmapEvent beatEvent, System.Boolean isAddedEvent) (at <6c554ed27fa1478db4b343d56024cb45>:0)
+Shared.RhythmEngine.BeatmapPlayer.ProcessBeatEvents (System.Single currentTime) (at <6c554ed27fa1478db4b343d56024cb45>:0)
+Shared.RhythmEngine.BeatmapPlayer.Update () (at <6c554ed27fa1478db4b343d56024cb45>:0)
+        */
+    }
+
+
     // [HarmonyPatch(typeof(RhythmRift.RREnemyInitializationData), "SetData")]
     // [HarmonyPrefix]
     // static bool SetData(
@@ -182,7 +340,7 @@ public class Plugin : BaseUnityPlugin
     //     return true;
     // }
 
-
+    /*
     [HarmonyPatch(typeof(Shared.RhythmEngine.BeatmapPlayer), "SetSongSpeedModifier")]
     [HarmonyPrefix]
     static bool ForceDoubleTime(ref BeatmapPlayer __instance){
@@ -210,6 +368,32 @@ public class Plugin : BaseUnityPlugin
         beatmapToSet.bpm *= 2;
         return true;
     }
+    //*/
 
     //     Awake()
+
+    // check why feedback no worky 
+    // seemed to work fine? idk.
+    // [HarmonyPatch(typeof(Shared.Feedback.FeedbackController), "Update")]
+    // [HarmonyPrefix]
+    // static bool OnFeedbackUpdate(Shared.Feedback.FeedbackController __instance){
+    //     Type type = __instance.GetType();
+    //     FieldInfo fieldInfo = type.GetField("_input", BindingFlags.NonPublic | BindingFlags.Instance);
+    //     RiftInputActions _input = (RiftInputActions)fieldInfo.GetValue(__instance);
+
+    //     if (_input != null){
+    //         Console.WriteLine($"{__instance.IsShowingFeedbackScreen} {_input.UI.OpenFeedback.WasPerformedThisFrame()} {_input.Gameplay.OpenFeedback.WasPerformedThisFrame()} {_input.Debug.OpenFeedback.WasPerformedThisFrame()}");
+    //     } else {
+    //         Console.WriteLine($"{__instance.IsShowingFeedbackScreen} cannot find :( ");
+    //     }
+    //     return true;
+    // }
+
+    /*
+    EnemyController UpdateSystem
+
+
+    */
+
+    
 }

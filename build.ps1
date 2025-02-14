@@ -3,6 +3,8 @@ param(
     $debug = 1
 )
 
+
+Copy-Item .\img\ D:\SteamLibrary\steamapps\common\RiftOfTheNecroDancerOSTVolume1\BepInEx\plugins\ -Recurse
 if ($debug){
     dotnet build
     Copy-Item .\bin\Debug\netstandard2.1\RiftAllseer.dll D:\SteamLibrary\steamapps\common\RiftOfTheNecroDancerOSTVolume1\BepInEx\plugins\RiftAllseer.dll
