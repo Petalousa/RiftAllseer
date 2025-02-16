@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>RiftAllseer</AssemblyName>
+    <AssemblyName>com.petalousa.riftallseer</AssemblyName>
     <Product>Rift Analytics Disabler + Remove ? Traps</Product>
     <Version>1.0.1</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,28 +16,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Game">
-      <HintPath>lib\Assembly-CSharp.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-    <ItemGroup>
-    <Reference Include="ObjectPooling">
-      <HintPath>lib\TicToc.ObjectPooling.Runtime.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="UnityMath">
-      <HintPath>lib\Unity.Mathematics.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Unity.Mono" Version="6.0.0-be.*" IncludeAssets="compile" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-	<PackageReference Include="UnityEngine.Modules" Version="2021.3.43" IncludeAssets="compile" />
+	  <PackageReference Include="UnityEngine.Modules" Version="2021.3.43" IncludeAssets="compile" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>lib\Assembly-CSharp.dll</HintPath>
+    </Reference>
+
+    <Reference Include="TicToc.ObjectPooling.Runtime">
+      <HintPath>lib\TicToc.ObjectPooling.Runtime.dll</HintPath>
+    </Reference>
+  
+    <Reference Include="Unity.Mathematics">
+      <HintPath>lib\Unity.Mathematics.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

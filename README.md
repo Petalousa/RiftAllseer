@@ -19,31 +19,31 @@ You can enable/disable any of the above by modifying a config file.
 This assumes you are running Windows 10, 64-bit
 
 1. Navigate to the Rift of the Necrodancer Steam Folder:
-![alt text](image.png)
+![alt text](md_content/image.png)
 
 2. Back up this folder somewhere safe
-![alt text](image-2.png)
+![alt text](md_content/image-2.png)
 
 3. Install BepInEx Mono
 
     a. download and unzip [BepInEx 6.0.0-be.733](https://builds.bepinex.dev/projects/bepinex_be/733/BepInEx-Unity.Mono-win-x64-6.0.0-be.733%2B995f049.zip)
 
-    ![alt text](image-3.png)
+    ![alt text](md_content/image-3.png)
 
     b. Copy the contents into your Rift of the NecroDancer steam directory
-    ![alt text](image-4.png)
+    ![alt text](md_content/image-4.png)
 
 4. Download this mod from the [release page here](https://github.com/Petalousa/RiftAllseer/releases/tag/v1.0.1)
-![alt text](image-7.png)
+![alt text](md_content/image-7.png)
 
 4. Install this mod by copying `RiftAllseer.dll` to the BepInEx plugins directory
-![alt text](image-5.png)
-![alt text](image-1.png)
+![alt text](md_content/image-5.png)
+![alt text](md_content/image-1.png)
 
 5. Launch rift of the necrodancer
 
 6. You should have a console window with info, meaning the mod has been launched successfully:
-![alt text](image-6.png)
+![alt text](md_content/image-6.png)
 
 # Configuration
 
@@ -66,6 +66,4 @@ In there you can change these configs:
 
 # TODO
 - [ ] figure out a non-console way to alert player of config settings
-- [ ] unpload scores if the beatmap doesn't have any ? blocks
 - [ ] alert player that score won't count after game (maybe text in menu screen or something?)
-- [ ] allow player to change config and reload while in game instead of requiring full restart
