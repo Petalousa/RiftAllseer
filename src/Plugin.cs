@@ -66,6 +66,7 @@ namespace RiftAllseer
             Harmony.CreateAndPatchAll(typeof(DisableAnalytics));
             Harmony.CreateAndPatchAll(typeof(GameplayPatches));
             Harmony.CreateAndPatchAll(typeof(TestPatches));
+            Harmony.CreateAndPatchAll(typeof(RememberLastDifficulty));
 
             Log.LogInfo("Patched");
         }
