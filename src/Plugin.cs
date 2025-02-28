@@ -62,10 +62,11 @@ namespace RiftAllseer
             Log.LogInfo("Sprites Loaded...");
 
             Harmony.CreateAndPatchAll(typeof(Plugin));
+            Harmony.CreateAndPatchAll(typeof(CustomMenuOptions));
             Harmony.CreateAndPatchAll(typeof(CustomSpriteShadows));
             Harmony.CreateAndPatchAll(typeof(DisableAnalytics));
             Harmony.CreateAndPatchAll(typeof(GameplayPatches));
-            Harmony.CreateAndPatchAll(typeof(TestPatches));
+            //Harmony.CreateAndPatchAll(typeof(TestPatches));
             Harmony.CreateAndPatchAll(typeof(RememberLastDifficulty));
 
             Log.LogInfo("Patched");
@@ -87,6 +88,39 @@ namespace RiftAllseer
                 Log.LogWarning($"shouldDisableAnalytics {shouldDisableAnalytics.Value}");
                 Log.LogWarning($"shouldLogAnalytics {shouldLogAnalytics.Value}");
                 Log.LogWarning($"scrollSpeedModifier {scrollSpeedModifier.Value}");
+            }
+
+            if (Input.GetKeyDown(KeyCode.F6)) // Press F5 to reload config
+            {
+                Log.LogInfo("=== SCENE ===");
+                LogSceneHierarchy();
+            }
+        }
+
+            private void LogSceneHierarchy()
+            {
+                // Get all root objects in the current scene
+                GameObject[] rootObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+
+                // Recursively log each root object's hierarchy
+                foreach (GameObject rootObj in rootObjects)
+                {
+                    LogGameObjectHierarchy(rootObj, 1);
+                }
+            }
+
+        private void LogGameObjectHierarchy(GameObject obj, int indentLevel)
+        {
+            // Create indentation based on the level of the hierarchy
+            string indent = new string('-', indentLevel * 2);
+
+            // Log the current GameObject's name and its type
+            Log.LogInfo($"{indent} {obj.name} (Type: {obj.GetType()})");
+
+            // Recursively log all children of the current GameObject
+            foreach (Transform child in obj.transform)
+            {
+                LogGameObjectHierarchy(child.gameObject, indentLevel + 1);
             }
         }
 

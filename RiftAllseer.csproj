@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>com.petalousa.riftallseer</AssemblyName>
-    <Product>Rift Analytics Disabler + Remove ? Traps</Product>
-    <Version>1.0.1</Version>
+    <Product>Rift Allseer</Product>
+    <Version>1.0.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
@@ -37,6 +37,14 @@
   
     <Reference Include="Unity.Mathematics">
       <HintPath>lib\Unity.Mathematics.dll</HintPath>
+    </Reference>
+    
+    <Reference Include="UnityEngine.UI">
+      <HintPath>lib\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    
+    <Reference Include="TMPro">
+      <HintPath>lib\Unity.TextMeshPro.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

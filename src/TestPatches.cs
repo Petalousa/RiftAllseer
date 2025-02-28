@@ -6,7 +6,10 @@ using UnityEngine;
 using RhythmRift.Enemies;
 using System.Diagnostics;
 using Shared.RhythmEngine;
+using Shared;
 using UnityEngine.SceneManagement;
+using Shared.MenuOptions;
+using System.Collections.Generic;
 
 namespace RiftAllseer {
     class TestPatches {
@@ -57,9 +60,63 @@ namespace RiftAllseer {
 
             return true;
         }
-        [HarmonyPatch(typeof(RhythmRift.Enemies.RREnemy), "UpdateMovement")]
+
+        static void wiggleInstance(ref RREnemy __instance){
+            Vector3 newPosition = ((Component)__instance).transform.position;
+            newPosition.x += (float)Math.Sin(Time.time * 8.0) * 0.1f;
+            ((Component)__instance).transform.position = newPosition;
+        }
+
+        [HarmonyPatch(typeof(RREnemy), "Initialize")]
         [HarmonyPostfix]
-        static void Whoop(ref RREnemy __instance){
+        static void SmooothMovement(ref RREnemy __instance){
+            FieldInfo mcurv = typeof(RREnemy).GetField("_movementCurve", BindingFlags.Instance | BindingFlags.NonPublic);
+            AnimationCurve _movementCurve = (AnimationCurve) mcurv.GetValue(__instance);
+            _movementCurve.SetKeys(
+                [
+                    new Keyframe(0.0f, 0.0f),
+                    new Keyframe(0.75f, 0.0f),
+                    new Keyframe(0.95f, 1.0f)
+                ]
+            );
+        }
+
+        [HarmonyPatch(typeof(RREnemy), "UpdateMovement")]
+        [HarmonyPrefix]
+        static bool Whoop(ref RREnemy __instance, ref FmodTimeCapsule fmodTimeCapsule){
+            MethodInfo m = typeof(RREnemy).GetMethod("GetNormalizedProgressToNextMove", BindingFlags.Instance | BindingFlags.NonPublic);
+
+            float normalizedProgressToNextMove = (float)m.Invoke(__instance, new object[] {fmodTimeCapsule} );
+            FieldInfo mcurv = typeof(RREnemy).GetField("_movementCurve", BindingFlags.Instance | BindingFlags.NonPublic);
+            AnimationCurve _movementCurve = (AnimationCurve) mcurv.GetValue(__instance);
+            float num5 = _movementCurve.Evaluate(normalizedProgressToNextMove);
+            Console.Write($"{__instance.name}, {__instance.DisplayName} {__instance.EnemyId}- {num5}- {normalizedProgressToNextMove}");
+            // Type typeInfo = typeof(RREnemy);
+            // MemberInfo[] members = typeInfo.GetMembers(); // Get all members
+            // foreach (var member in members)
+            // {
+            //     Console.WriteLine($"{member.MemberType}: {member.Name}");
+            // }
+            PropertyInfo isSnapProp = typeof(RREnemy).GetProperty("IsSnappingToActionRow", BindingFlags.Instance | BindingFlags.NonPublic);
+            bool IsSnappingToActionRow = (bool)isSnapProp.GetValue(__instance);
+
+            if (IsSnappingToActionRow){
+                // seems to occur w/ blue slimes?
+                // not sure about yellow ones
+
+                // Console.Write($"is_snapping - {__instance.DisplayName}");
+                // wiggleInstance(ref __instance);
+                // return false;
+            }
+
+            FieldInfo f = typeof(RREnemy).GetField("_specialActionMoveCurve", BindingFlags.Instance | BindingFlags.NonPublic);
+            AnimationCurve _specialActionMoveCurve = (AnimationCurve)f.GetValue(__instance);
+            if (__instance.IsPerformingSpecialActionMovement && f != null){
+                Console.Write($"is_specialmove - {__instance.DisplayName}");
+                wiggleInstance(ref __instance);
+            }
+
+            return true;
             //Vector3 newPosition = ((Component)__instance).transform.position;
             //newPosition.x += (float)Math.Sin(Time.time * 8.0) * 0.1f;
             //((Component)__instance).transform.position = newPosition;
@@ -304,5 +361,50 @@ namespace RiftAllseer {
 
         */
 
+        // set default difficulty
+        // [HarmonyPatch(typeof(Shared.TrackSelection.DifficultySelectionOptionGroup), "Initialize")]
+        // [HarmonyPrefix]
+        // static bool InitializeDifficultySelector(ref Difficulty selectedDifficulty){
+        //     Console.Write($"diff sel start - {selectedDifficulty}");
+        //     selectedDifficulty = Difficulty.Impossible;
+        //     return true;
+        // this causes wierd UI issues with 'play' bg.
+        // }
+        // [HarmonyPatch(typeof(Shared.TrackSelection.DifficultySelectionOptionGroup), "Initialize")]
+        // [HarmonyPostfix]
+        // static void CallDiffOnChange(ref Shared.TrackSelection.DifficultySelectionOptionGroup __instance){
+
+        //     // MethodInfo [] ms = typeof(Shared.TrackSelection.DifficultySelectionOptionGroup).GetMethods(BindingFlags.Instance | BindingFlags.NonPublic);
+        //     // foreach( MethodInfo m1 in ms){
+        //     //     Console.Write($"{m1.Name}");
+        //     // }
+        //     // return;
+        //     //EventInfo type = typeof(Shared.TrackSelection.DifficultySelectionOptionGroup).GetEvent("OnDifficultyChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+        //     FieldInfo selField = typeof(Shared.TrackSelection.DifficultySelectionOptionGroup).GetField("_selectionIndex", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+        //     PropertyInfo sel2Field = typeof(Shared.TrackSelection.DifficultySelectionOptionGroup).GetProperty("LastOptionIndex", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+        //     int _selectionIndex = (int)selField.GetValue(__instance);
+        //     int _selectionIndexBase = (int)sel2Field.GetValue(__instance);
+
+        //     FieldInfo opField = typeof(Shared.TrackSelection.DifficultySelectionOptionGroup).GetField("_options", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+        //     List<SelectableOption> _options = (List<SelectableOption>)opField.GetValue(__instance);
+        //     Console.Write($"{_selectionIndex} - {_selectionIndexBase}");
+        //     //_options[1].SetSelected(false, false);
+
+        //     // ((SelectableOption)_options[1]).SetSelected(false, false);
+        //     // ((SelectableOption)_options[3]).SetSelected(true, false);
+
+        //     // _options[lastSelectionIndex].SetSelected(value: false, isMovingUpLeft);
+        //     // _options[_selectionIndex].SetSelected(value: true, isMovingUpLeft);
+
+
+        //     FieldInfo backingField = typeof(Shared.TrackSelection.DifficultySelectionOptionGroup).GetField("OnDifficultyChanged", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetField);
+        //     Delegate eventDelegate = (Delegate)backingField.GetValue(__instance);
+        //     //GetMethod("OnDifficultyChanged", BindingFlags.Instance | BindingFlags.NonPublic);
+        //     //eventDelegate.DynamicInvoke([Difficulty.Impossible]);
+        //     Console.Write($"post diff sel start ");
+        //     // Delegate d = (Delegate)
+        //     // m.Get(__instance, [Difficulty.Impossible]);
+
+        // }
     }
 }
