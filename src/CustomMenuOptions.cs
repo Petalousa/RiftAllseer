@@ -13,20 +13,67 @@ namespace RiftAllseer {
     class CustomMenuOptions {
 
         public static TextButtonOption modOptions;
+        public static SelectableOptionGroup modOptionsGroup;
 
         [HarmonyPatch(typeof(SettingsAccessor), "RequestSettingsMenu")]
         [HarmonyPostfix]
         public static void RequestSettingsMenu(ref SettingsMenuManager __result){
-            if (__result == null){ return; }
+            // if (__result == null){ return; }
 
-            LogGameObjectHierarchy(__result.transform.parent.gameObject, 0, 3);
+            // if (modOptionsGroup == null){
+            //     modOptionsGroup = YoinkOG(__result.transform.gameObject);
+            // }
+
+            // if (modOptionsGroup == null){
+            //     Console.Write("Couldn't find optiongroup :9");
+            //     return;
+            // }
+
+            // //SelectableOption s1 = modOptionsGroup.GetOptionAtIndex(0);
+            // Console.Write($"{modOptionsGroup.name} - modOptionsGroup");
+            
+            // FieldInfo f_settings_button = typeof(SettingsMenuManager).GetField("_returnButton", BindingFlags.NonPublic | BindingFlags.Instance);
+            // TextButtonOption return_button = (TextButtonOption)f_settings_button.GetValue(__result);
+
+            // Console.Write("FIELD :9");
+
+            // FieldInfo f = typeof(TextButtonOption).GetField("_textLabels", BindingFlags.NonPublic | BindingFlags.Instance);
+            // TextButtonOption m1 = TextButtonOption.Instantiate(return_button);
+            // TMP_Text[] _textLabels = (TMP_Text[])f.GetValue(m1);
+            // _textLabels[0].text = "BOB";
+
+            // Console.Write("FIELD :8");
+
+            // m1.gameObject.transform.SetParent(return_button.transform.parent);
+            // modOptionsGroup.TryAddOption(m1);
+            // Console.Write("FIELD :7");
+            //LogGameObjectHierarchy(__result.transform.parent.gameObject, 0, 3);
 
             //Console.Write(__result.gameObject)
         }
 
+        private static SelectableOptionGroup YoinkOG(GameObject obj){
+            MonoBehaviour[] behaviours = obj.GetComponents<MonoBehaviour>();
+            foreach (MonoBehaviour behaviour in behaviours)
+            {
+                if (behaviour.GetType() == typeof(SelectableOptionGroup)){
+                    return (SelectableOptionGroup)behaviour;
+                }
+            }
 
-        public static void IGNOREME(ref SettingsMenuManager __result){
+            foreach (Transform child in obj.transform)
+            {
+                SelectableOptionGroup result = YoinkOG(child.gameObject);
+                if (result != null){
+                    return result;
+                }
+            }
+            return null;
+        }
+
+
             // if (__result == null){ return; }
+        public static void IGNOREME(ref SettingsMenuManager __result){
 
             // Transform a = __result.transform.GetChild(0);
             // TextButtonOption t = (TextButtonOption)a.gameObject.GetComponent(typeof(TextButtonOption));

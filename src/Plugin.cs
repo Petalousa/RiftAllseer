@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Collections.Generic;
 
 using BepInEx;
 using BepInEx.Logging;
@@ -25,6 +26,28 @@ namespace RiftAllseer
         internal static ConfigEntry<bool> shouldDisableHiddenTraps;
 
         internal static ConfigEntry<float> scrollSpeedModifier;
+
+        public static T GetValue<T>(Type instanceType, System.Object instance, string valueName){
+            FieldInfo f = instanceType.GetField(valueName, BindingFlags.Instance | BindingFlags.NonPublic);
+            if (f == null){
+                PropertyInfo p = instanceType.GetProperty(valueName, BindingFlags.Instance | BindingFlags.NonPublic);
+                if (p == null){
+                    Console.Write($"Unable to find {valueName} in {instanceType}");
+
+                    System.Reflection.MemberInfo[] mi = instanceType.GetMembers(BindingFlags.Instance | BindingFlags.NonPublic);
+                    foreach (MemberInfo m in mi){
+                        Console.Write($"Members: {m.Name} > {m.MemberType}");
+                    }
+                    
+                }
+                return (T)p.GetValue(instance);
+            }
+            return (T)f.GetValue(instance);
+        }
+        public static MethodInfo GetMethod(Type instanceType, string methodName){
+            MethodInfo f = instanceType.GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic);
+            return f;
+        }
 
         private void Awake()
         {
@@ -65,6 +88,7 @@ namespace RiftAllseer
             Harmony.CreateAndPatchAll(typeof(CustomMenuOptions));
             Harmony.CreateAndPatchAll(typeof(CustomSpriteShadows));
             Harmony.CreateAndPatchAll(typeof(DisableAnalytics));
+            Harmony.CreateAndPatchAll(typeof(Skelepush));
             Harmony.CreateAndPatchAll(typeof(GameplayPatches));
             //Harmony.CreateAndPatchAll(typeof(TestPatches));
             Harmony.CreateAndPatchAll(typeof(RememberLastDifficulty));
